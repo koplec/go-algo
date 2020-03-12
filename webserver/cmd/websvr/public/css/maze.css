@@ -1,0 +1,17 @@
+.maze-table--td {
+  border: 1px solid gray;
+  width: 25px;
+  height: 25px;
+}
+.maze-table--td__occupied{
+  background-color: black;
+}
+
+.maze-table--td__empty{
+  background-color: white;
+  cursor: pointer;
+}
+
+.maze-table--td__start, .maze-table--td__goal {
+  background-color: yellow;
+}

@@ -3,7 +3,6 @@ package maze
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 )
 
@@ -18,9 +17,10 @@ const (
 )
 
 type MazeMap struct {
-	ary [][]int
-	Row int
-	Col int
+	//ary:整数の配列, 壁は1,通路は0で表現
+	Map [][]int `json:"map"`
+	Row int     `json:"row"`
+	Col int     `json:"col"`
 }
 
 /**
@@ -55,7 +55,7 @@ func InitMazeMap(row, col int) (*MazeMap, error) {
 		ary[i][col-1] = OCCUPIED
 	}
 	maze := MazeMap{
-		ary: ary,
+		Map: ary,
 		Row: row,
 		Col: col,
 	}
@@ -68,14 +68,14 @@ func InitMazeMap(row, col int) (*MazeMap, error) {
 }
 
 func (m *MazeMap) isEmpty(i, j int) bool {
-	ary := m.ary
+	ary := m.Map
 	return ary[i][j] == EMPTY
 }
 
 func (m *MazeMap) iterateRods(proc func(i, j int, ary [][]int) error) error {
 	row := m.Row
 	col := m.Col
-	ary := m.ary
+	ary := m.Map
 	for i := 2; i <= row-2; i = i + 2 {
 		for j := 2; j <= col-2; j = j + 2 {
 			err := proc(i, j, ary)
@@ -93,55 +93,55 @@ func (m *MazeMap) doCreateMaze() error {
 		L0:
 			for {
 				a := rand.Intn(4)
-				log.Printf("(i,j)=(%d,%d) , a=%d", i, j, a)
+				//log.Printf("(i,j)=(%d,%d) , a=%d", i, j, a)
 				switch a {
 				case DIR_RIGHT:
 					if m.isEmpty(i, j+1) {
-						m.ary[i][j+1] = OCCUPIED
+						m.Map[i][j+1] = OCCUPIED
 						break L0
 					}
 				case DIR_DOWN:
 					if m.isEmpty(i+1, j) {
-						m.ary[i+1][j] = OCCUPIED
+						m.Map[i+1][j] = OCCUPIED
 						break L0
 					}
 				case DIR_LEFT:
 					if m.isEmpty(i, j-1) {
-						m.ary[i][j-1] = OCCUPIED
+						m.Map[i][j-1] = OCCUPIED
 						break L0
 					}
 				case DIR_UP:
 					if m.isEmpty(i-1, j) {
-						m.ary[i-1][j] = OCCUPIED
+						m.Map[i-1][j] = OCCUPIED
 						break L0
 					}
 				}
 			}
-			log.Println("for L0 END")
+			//log.Println("for L0 END")
 		} else {
 		L1:
 			for {
 				a := rand.Intn(3)
-				log.Printf("(i,j)=(%d,%d) , a=%d", i, j, a)
+				//log.Printf("(i,j)=(%d,%d) , a=%d", i, j, a)
 				switch a {
 				case DIR_RIGHT:
 					if m.isEmpty(i, j+1) {
-						m.ary[i][j+1] = OCCUPIED
+						m.Map[i][j+1] = OCCUPIED
 						break L1
 					}
 				case DIR_DOWN:
 					if m.isEmpty(i+1, j) {
-						m.ary[i+1][j] = OCCUPIED
+						m.Map[i+1][j] = OCCUPIED
 						break L1
 					}
 				case DIR_LEFT:
 					if m.isEmpty(i, j-1) {
-						m.ary[i][j-1] = OCCUPIED
+						m.Map[i][j-1] = OCCUPIED
 						break L1
 					}
 				}
 			}
-			log.Println("for L1 END2")
+			//log.Println("for L1 END2")
 		}
 		return nil
 	})
@@ -150,7 +150,7 @@ func (m *MazeMap) doCreateMaze() error {
 func (m *MazeMap) DebugPrintMaze() {
 	row := m.Row
 	col := m.Col
-	ary := m.ary
+	ary := m.Map
 	for i := 0; i < row; i++ {
 		for j := 0; j < col; j++ {
 			val := ary[i][j]
