@@ -1,3 +1,8 @@
+function safeParseInt(str, /* optional */defaultValue) {
+	if (typeof (str) == 'number') return str;
+	if (!str) return defaultValue;
+	return parseInt(str, 10);
+}
 
 // remove equaled value
 Array.prototype.remove = function (v, /* optional */f) {

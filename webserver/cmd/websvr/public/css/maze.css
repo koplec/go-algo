@@ -1,3 +1,7 @@
+.maze-ctrl {
+  display: flex;
+}
+
 .maze-table--td {
   border: 1px solid gray;
   width: 25px;
@@ -10,6 +14,10 @@
 .maze-table--td__empty{
   background-color: white;
   cursor: pointer;
+}
+
+.maze-table--td__route{
+  background-color: red;
 }
 
 .maze-table--td__start, .maze-table--td__goal {

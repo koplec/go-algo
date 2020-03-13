@@ -7,6 +7,7 @@ uuid
  */
 const El = (function () {
 	function create(tagName, opt/* {id, classList, t} */) {
+		if (typeof opt == "undefined") opt = {};
 		const elem = document.createElement(tagName);
 		if (opt.id) {
 			elem.id = opt.id;
@@ -83,9 +84,9 @@ Object.assign(El, {
 		elem.setAttribute("aria-hidden", true);
 		return elem;
 	},
-	divText: function (txt, id, classList) {
-		let elem = El.div(id, classList);
-		let text = El.text(txt);
+	divText: function (t, opt/*txt, id, classList*/) {
+		let elem = El.div(opt);
+		let text = El.text(t);
 		elem.appendChild(text);
 		return elem;
 	},

@@ -45,7 +45,7 @@ func (m *MazeMap) solve(start, goal []int) ([][]int, error) {
 	froms := make([][][]int, row) //移動元の場所を管理
 	//froms initial
 	for i := 0; i < row; i++ {
-		r := make([][]int, row)
+		r := make([][]int, col)
 		for j := 0; j < col; j++ {
 			r[j] = nil
 		}
@@ -83,7 +83,7 @@ func (m *MazeMap) solve(start, goal []int) ([][]int, error) {
 
 		ii = i + 1
 		jj = j
-		if jj <= row-1 {
+		if ii <= row-1 {
 			if mm[ii][jj] == EMPTY {
 				ret = append(ret, []int{ii, jj})
 			}
