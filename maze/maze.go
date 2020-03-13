@@ -3,6 +3,7 @@ package maze
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 )
 
@@ -31,6 +32,144 @@ func Create(row, col int) (*MazeMap, error) {
 	//順番に棒を倒していく
 	err = mazeMap.doCreateMaze()
 	return mazeMap, err
+}
+
+func (m *MazeMap) solve(start, goal []int) ([][]int, error) {
+	log.Printf("solve BEGIN")
+	mm := m.CopyMap() //迷路の地図　すでに通ったところに印をつける（0:empty 1:occupied壁）
+	row := len(mm)    //迷路の横の行の数
+	col := len(mm[0]) //迷路の縦の列の数
+	var cur []int     //現在位置
+
+	queue := make([][]int, 0)     //幅優先探索で利用するqueue
+	froms := make([][][]int, row) //移動元の場所を管理
+	//froms initial
+	for i := 0; i < row; i++ {
+		r := make([][]int, row)
+		for j := 0; j < col; j++ {
+			r[j] = nil
+		}
+		froms[i] = r
+	}
+
+	//var nexts [][]int //現在位置から移動ができるところ。既に通ったところは除く
+
+	var searchNexts = func(i, j int) [][]int {
+		ret := make([][]int, 0)
+
+		ii := i
+		jj := j + 1
+		if jj <= col-1 {
+			if mm[ii][jj] == EMPTY {
+				ret = append(ret, []int{ii, jj})
+			}
+		}
+
+		ii = i
+		jj = j - 1
+		if jj >= 0 {
+			if mm[ii][jj] == EMPTY {
+				ret = append(ret, []int{ii, jj})
+			}
+		}
+
+		ii = i - 1
+		jj = j
+		if ii >= 0 {
+			if mm[ii][jj] == EMPTY {
+				ret = append(ret, []int{ii, jj})
+			}
+		}
+
+		ii = i + 1
+		jj = j
+		if jj <= row-1 {
+			if mm[ii][jj] == EMPTY {
+				ret = append(ret, []int{ii, jj})
+			}
+		}
+		return ret
+	}
+	var searchFrom = func(i, j int) []int {
+		f := froms[i][j]
+		return f
+	}
+	var setFrom = func(toi, toj, fromi, fromj int) {
+		froms[toi][toj] = []int{fromi, fromj}
+	}
+	var solvePath = func() [][]int {
+		paths := make([][]int, 0)
+		paths = append(paths, cur)
+		curi := cur[0]
+		curj := cur[1]
+		for {
+			f := searchFrom(curi, curj)
+			if f == nil {
+				break
+			}
+			curi = f[0]
+			curj = f[1]
+			paths = append(paths, f)
+		}
+
+		//reverse
+		ret := make([][]int, 0)
+		for i := len(paths) - 1; i >= 0; i-- {
+			ret = append(ret, paths[i])
+		}
+		return ret
+	}
+
+	log.Printf("  search BEGIN")
+	queue = append(queue, start)
+	for len(queue) != 0 {
+		cur = queue[0]
+		//もしgoalだったらおしまい。
+		curi := cur[0]
+		curj := cur[1]
+		if curi == goal[0] && curj == goal[1] {
+			break
+		}
+
+		queue = queue[1:]
+
+		//curから移動できるところを探す
+		nexts := searchNexts(curi, curj)
+		for i := 0; i < len(nexts); i++ {
+			next := nexts[i]
+			queue = append(queue, next)
+			setFrom(next[0], next[1], curi, curj)
+		}
+
+		//今の場所に印をつける
+		mm[curi][curj] = OCCUPIED
+	}
+
+	log.Printf("  search END")
+
+	if cur != nil {
+		log.Printf("  path BEGIN")
+		paths := solvePath()
+		log.Printf("  path END")
+		return paths, nil
+	}
+	log.Printf("  cur is nil!!")
+	return nil, errors.New("cur is nil")
+}
+
+func New(mazeMap [][]int) *MazeMap {
+	row := len(mazeMap)
+	col := len(mazeMap[0])
+	maze := MazeMap{
+		Map: mazeMap,
+		Row: row, Col: col,
+	}
+	return &maze
+}
+
+func Solve(mazeMap [][]int, start []int, goal []int) (route [][]int, err error) {
+	maze := New(mazeMap)
+	return maze.solve(start, goal)
 }
 
 func InitMazeMap(row, col int) (*MazeMap, error) {
@@ -70,6 +209,20 @@ func InitMazeMap(row, col int) (*MazeMap, error) {
 func (m *MazeMap) isEmpty(i, j int) bool {
 	ary := m.Map
 	return ary[i][j] == EMPTY
+}
+
+func (m *MazeMap) CopyMap() [][]int {
+	ary := m.Map
+	row := len(ary)
+	ret := make([][]int, row)
+
+	for i := 0; i < row; i++ {
+		c := make([]int, len(ary[i]))
+		copy(c, ary[i])
+		ret[i] = c
+	}
+
+	return ret
 }
 
 func (m *MazeMap) iterateRods(proc func(i, j int, ary [][]int) error) error {
